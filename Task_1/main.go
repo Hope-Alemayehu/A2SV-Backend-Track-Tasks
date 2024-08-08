@@ -1,8 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"os"
 	"strings"
+	"unicode"
 )
 
 func calculateAverage(total float32, numberOfSubjects int) float32 {
@@ -28,10 +31,15 @@ func display(name string, subjectToGrade map[string]float32, Average float32) {
 }
 
 func validateName(name string) bool {
-	invalidChars := "!@#$%^&*()_-+={}[]:;|<>,.?/~`1234567890"
+
 	//names should always be letters
-	if len(name) == 0 || strings.ContainsAny(name, invalidChars) {
+	if len(name) == 0 {
 		return false
+	}
+	for _, c := range name {
+		if !unicode.IsLetter(c) && !unicode.IsSpace(c) {
+			return false
+		}
 	}
 	return true
 }
@@ -61,8 +69,10 @@ func main() {
 	var totalGrade float32
 	subjectToGrade := make(map[string]float32)
 
-	fmt.Print("Enter Your first name: ")
-	fmt.Scanln(&name)
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Print("Enter Your name: ")
+	name, _ = reader.ReadString('\n')
+	name = strings.TrimSpace(name)
 
 	if !validateName(name) {
 		fmt.Println("Invalid name. Please Enter a name that contains letters and spaces.")
@@ -79,7 +89,8 @@ func main() {
 
 	for i := 0; i < numberOfSubjects; i++ {
 		fmt.Print("Subject Name: ")
-		fmt.Scanln(&subject)
+		subject, _ = reader.ReadString('\n')
+		subject = strings.TrimSpace(subject)
 
 		if !validateSubjectName(subject) {
 			fmt.Println("Invalid subject name.")
