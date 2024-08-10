@@ -2,18 +2,21 @@ package main
 
 import (
 	"fmt"
-	"task_manager/router"
+	"log"
+	"task_manager/task_manager/database"
+	"task_manager/task_manager/router"
 )
 
 func main() {
-	fmt.Println(("Task Manager API is starting..."))
+	// Connect to the database
+	database.ConnectDB()
+	defer database.DisconnectDB()
+
+	// Set up the router
 	r := router.SetUpRouter()
 
-	//we can adjust this as needed
-	port := ":8080"
-
-	if err := r.Run(port); err != nil {
-		fmt.Printf("Error starting server: %v\n", err)
+	fmt.Println("Task manager API running on http://localhost:8080")
+	if err := r.Run(":8080"); err != nil {
+		log.Fatalf("Error starting server: %v\n", err)
 	}
-
 }

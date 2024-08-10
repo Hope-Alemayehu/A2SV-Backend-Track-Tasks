@@ -1,11 +1,10 @@
 package models
 
-import "time"
-
+// Task struct represents the structure of a task
 type Task struct {
-	ID          string    `json:"id"`
-	Title       string    `json:"title"`
-	Description string    `json:"description"`
-	DueDate     time.Time `json:"due_date"`
-	Status      string    `json:"status"`
+	ID          string `json:"id"bson:"_id"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	DueDate     string `json:"due_date"`
+	Status      string `json:"status"`
 }
