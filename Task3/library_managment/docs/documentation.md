@@ -2,40 +2,64 @@
 
 ## Overview
 
-This project implements a simple console-based library management system in Go. It demonstrates the use of structs, interfaces, methods, slices, and maps.
+The Library Management System is a Go-based application designed to manage books and members in a library. The system allows users to add, remove, borrow, and return books, as well as list available and borrowed books.
 
-## Features
+### Controllers
 
-- Add a new book
-- Remove an existing book
-- Borrow a book
-- Return a book
-- List all available books
-- List all borrowed books by a member
+The controllers package contains the logic for handling user input and interacting with the library services.
 
-## Directory Structure
+### Functions
 
-library_management/
-├── main.go
-├── controllers/
-│ └── library_controller.go
-├── models/
-│ └── book.go
-│ └── member.go
-├── services/
-│ └── library_service.go
-├── docs/
-│ └── documentation.md
-└── go.mod
+- **ShowMenu**: Displays the main menu to the user.
+- **GetInput**: Reads user input from the console.
+- **HandleAddBook**: Adds a new book to the library.
+- **HandleRemoveBook**: Removes a book from the library.
+- **HandleBorrowBook**: Borrows a book from the library.
+- **HandleReturnBook**: Returns a borrowed book to the library.
+- **HandleListAvailableBooks**: Lists all available books in the library.
+- **HandleListBorrowedBooks**: Lists all borrowed books by a member.
+- **RunLibraryManagementSystem**: Runs the library management system.
+  Models
+  The models package contains the data structures for books and members.
 
-markdown
-Copy code
+### Structs
 
-## Running the Application
+- **Book**: Represents a book with an ID, title, author, and status.
+- **Member**: Represents a member with an ID, name, and borrowed books.
 
-1. Navigate to the `library_management` directory.
-2. Run `go run main.go`.
+### Services
 
-## Implementation Details
+The services package contains the logic for managing books and members.
 
-- `Book` struct represents
+#### Interfaces
+
+- **LibraryManager**: Defines the interface for library management.
+- **Structs Library**: Implements the LibraryManager interface.
+- **AddBook**: Adds a new book to the library.
+- **RemoveBook**: Removes a book from the library.
+- **BorrowBook**: Borrows a book from the library.
+- **ReturnBook**: Returns a borrowed book to the library.
+- **ListAvailableBooks**: Lists all available books in the library.
+- **ListBorrowedBooks**: Lists all borrowed books by a member.
+
+### Main
+
+The main package contains the entry point for the application.
+
+#### Functions
+
+- **main**: Runs the library management system.
+
+### Usage
+
+To use the Library Management System, simply run the application and follow the prompts. The system will guide you through the available options.
+
+### System Requirements
+
+- Go programming language (version 1.15 or later)
+- console or terminal to run the application
+
+### Known Limitations
+
+- The system does not persist data across sessions. All data is lost when the application is closed.
+- The system does not have any error handling or validation for user input.
