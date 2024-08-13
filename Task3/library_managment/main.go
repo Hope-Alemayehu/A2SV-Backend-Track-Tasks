@@ -1,7 +1,12 @@
 package main
 
-import "library_managment/controllers"
+import (
+	"library_managment/controllers"
+	"library_managment/services"
+)
 
 func main() {
-	controllers.RunLibraryManagementSystem()
+	service := services.NewLibrary()
+	controller := controllers.NewLibraryController(service)
+	controllers.RunLibraryManagementSystem(controller)
 }
