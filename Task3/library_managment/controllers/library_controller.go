@@ -10,6 +10,16 @@ import (
 	"strings"
 )
 
+// create a libraryControler struct
+type LibraryControler struct {
+	LibraryInt services.LibraryManager
+}
+
+// create an instance of library manager and return struct
+func NewLibraryController(LibraryInt services.LibraryManager) *LibraryControler {
+	return &LibraryControler{LibraryInt: LibraryInt}
+}
+
 func ShowMenu() {
 	fmt.Println("1. Add a new book")
 	fmt.Println("2. Remove an existing book")
@@ -27,7 +37,7 @@ func GetInput() string {
 	return strings.TrimSpace(input)
 }
 
-func HandleAddBook(library *services.Library) {
+func HandleAddBook(library *LibraryControler) {
 	fmt.Print("Enter book ID: ")
 	id, _ := strconv.Atoi(GetInput())
 	fmt.Print("Enter book title: ")
@@ -35,23 +45,23 @@ func HandleAddBook(library *services.Library) {
 	fmt.Print("Enter book author: ")
 	author := GetInput()
 	book := models.Book{ID: id, Title: title, Author: author, Status: "Available"}
-	library.AddBook(book)
+	library.LibraryInt.AddBook(book)
 	fmt.Println("Book added successfully!")
 }
 
-func HandleRemoveBook(library *services.Library) {
+func HandleRemoveBook(library *LibraryControler) {
 	fmt.Print("Enter book ID: ")
 	id, _ := strconv.Atoi(GetInput())
-	library.RemoveBook(id)
+	library.LibraryInt.RemoveBook(id)
 	fmt.Println("Book removed successfully!")
 }
 
-func HandleBorrowBook(library *services.Library) {
+func HandleBorrowBook(library *LibraryControler) {
 	fmt.Print("Enter book ID: ")
 	bookID, _ := strconv.Atoi(GetInput())
 	fmt.Print("Enter member ID: ")
 	memberID, _ := strconv.Atoi(GetInput())
-	err := library.BorrowBook(bookID, memberID)
+	err := library.LibraryInt.BorrowBook(bookID, memberID)
 	if err != nil {
 		fmt.Println("Error:", err)
 	} else {
@@ -59,12 +69,12 @@ func HandleBorrowBook(library *services.Library) {
 	}
 }
 
-func HandleReturnBook(library *services.Library) {
+func HandleReturnBook(library *LibraryControler) {
 	fmt.Print("Enter book ID: ")
 	bookID, _ := strconv.Atoi(GetInput())
 	fmt.Print("Enter member ID: ")
 	memberID, _ := strconv.Atoi(GetInput())
-	err := library.ReturnBook(bookID, memberID)
+	err := library.LibraryInt.ReturnBook(bookID, memberID)
 	if err != nil {
 		fmt.Println("Error:", err)
 	} else {
@@ -72,8 +82,8 @@ func HandleReturnBook(library *services.Library) {
 	}
 }
 
-func HandleListAvailableBooks(library *services.Library) {
-	books := library.ListAvailableBooks()
+func HandleListAvailableBooks(library *LibraryControler) {
+	books := library.LibraryInt.ListAvailableBooks()
 	if len(books) == 0 {
 		fmt.Println("No available books.")
 	} else {
@@ -84,10 +94,10 @@ func HandleListAvailableBooks(library *services.Library) {
 	}
 }
 
-func HandleListBorrowedBooks(library *services.Library) {
+func HandleListBorrowedBooks(library *LibraryControler) {
 	fmt.Print("Enter member ID: ")
 	memberID, _ := strconv.Atoi(GetInput())
-	books := library.ListBorrowedBooks(memberID)
+	books := library.LibraryInt.ListBorrowedBooks(memberID)
 	if len(books) == 0 {
 		fmt.Println("No borrowed books.")
 	} else {
@@ -98,24 +108,24 @@ func HandleListBorrowedBooks(library *services.Library) {
 	}
 }
 
-func RunLibraryManagementSystem() {
-	library := services.NewLibrary()
+func RunLibraryManagementSystem(controller *LibraryControler) {
+
 	for {
 		ShowMenu()
 		choice := GetInput()
 		switch choice {
 		case "1":
-			HandleAddBook(library)
+			HandleAddBook(controller)
 		case "2":
-			HandleRemoveBook(library)
+			HandleRemoveBook(controller)
 		case "3":
-			HandleBorrowBook(library)
+			HandleBorrowBook(controller)
 		case "4":
-			HandleReturnBook(library)
+			HandleReturnBook(controller)
 		case "5":
-			HandleListAvailableBooks(library)
+			HandleListAvailableBooks(controller)
 		case "6":
-			HandleListBorrowedBooks(library)
+			HandleListBorrowedBooks(controller)
 		case "7":
 			fmt.Println("Exiting...")
 			return
