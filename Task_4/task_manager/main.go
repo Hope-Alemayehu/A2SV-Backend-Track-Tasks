@@ -1,19 +1,32 @@
 package main
 
 import (
-	"fmt"
+	"context"
+	"log"
+	"task_manager/controllers"
+	"task_manager/data"
 	"task_manager/router"
+
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func main() {
-	fmt.Println(("Task Manager API is starting..."))
-	r := router.SetUpRouter()
-
-	//we can adjust this as needed
-	port := ":8080"
-
-	if err := r.Run(port); err != nil {
-		fmt.Printf("Error starting server: %v\n", err)
+	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
+	client, err := mongo.Connect(context.Background(), clientOptions)
+	if err != nil {
+		log.Fatal(err)
 	}
 
+	userCollection := client.Database("taskmanager").Collection("users")
+	taskCollection := client.Database("taskmanager").Collection("tasks")
+
+	userService := data.NewUserService(userCollection)
+	taskService := data.NewTaskService(taskCollection)
+
+	controllers.SetServices(userService, taskService)
+
+	r := router.SetUpRouter()
+
+	r.Run(":8080")
 }

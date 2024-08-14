@@ -1,94 +1,73 @@
 package data
 
 import (
-	"errors"
-	"sync"
+	"context"
 	"task_manager/models"
+
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type TaskService struct {
-	//to ensure thread safe access to the tasks map
-	//for concurency control
-	mu sync.Mutex
-
-	tasks map[string]models.Task
+	collection *mongo.Collection
 }
 
-// return the pointer to Taskservice struct
-func NewTaskService() *TaskService {
-
-	//return the pointer to newly created TaskService instance
-	return &TaskService{
-		tasks: make(map[string]models.Task),
-	}
+func NewTaskService(collection *mongo.Collection) *TaskService {
+	return &TaskService{collection: collection}
 }
 
-func (s *TaskService) GetAllTasks() []models.Task {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	//creating a list to store the task
-	taskList := make([]models.Task, 0, len(s.tasks))
-
-	for _, task := range s.tasks {
-		taskList = append(taskList, task)
+func (s *TaskService) GetTasks() ([]models.Task, error) {
+	cur, err := s.collection.Find(context.Background(), bson.D{})
+	if err != nil {
+		return nil, err
 	}
-	return taskList
+	defer cur.Close(context.Background())
+
+	var tasks []models.Task
+	for cur.Next(context.Background()) {
+		var task models.Task
+		if err := cur.Decode(&task); err != nil {
+			return nil, err
+		}
+		tasks = append(tasks, task)
+	}
+	return tasks, nil
 }
 
-func (s *TaskService) GetTaskById(id string) (models.Task, error) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	task, ok := s.tasks[id]
-	if !ok {
-		return models.Task{}, errors.New("task not found")
+func (s *TaskService) GetTaskById(id string) (*models.Task, error) {
+	objID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
 	}
-	return task, nil
+	var task models.Task
+	err = s.collection.FindOne(context.Background(), bson.M{"_id": objID}).Decode(&task)
+	if err != nil {
+		return nil, err
+	}
+	return &task, nil
 }
 
-func (s *TaskService) AddTask(task models.Task) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	s.tasks[task.ID] = task
+func (s *TaskService) CreateTask(task *models.Task) error {
+	task.ID = primitive.NewObjectID()
+	_, err := s.collection.InsertOne(context.Background(), task)
+	return err
 }
 
-func (s *TaskService) UpdateTask(id string, UpdatedTask models.Task) error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	task, ok := s.tasks[id]
-	if !ok {
-		return errors.New("task not found")
-
+func (s *TaskService) UpdateTask(id string, task *models.Task) error {
+	objID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
 	}
-	if UpdatedTask.Title != "" {
-		task.Title = UpdatedTask.Title
-	}
-	if UpdatedTask.Description != "" {
-		task.Description = UpdatedTask.Description
-	}
-	if UpdatedTask.DueDate.IsZero() {
-		task.DueDate = UpdatedTask.DueDate
-	}
-	if UpdatedTask.Status != "" {
-		task.Status = UpdatedTask.Status
-	}
-
-	s.tasks[id] = task
-	return nil
-
+	_, err = s.collection.UpdateOne(context.Background(), bson.M{"_id": objID}, bson.M{"$set": task})
+	return err
 }
 
 func (s *TaskService) DeleteTask(id string) error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	_, ok := s.tasks[id]
-	if !ok {
-		return errors.New("task not found")
+	objID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
 	}
-	delete(s.tasks, id)
-	return nil
+	_, err = s.collection.DeleteOne(context.Background(), bson.M{"_id": objID})
+	return err
 }
